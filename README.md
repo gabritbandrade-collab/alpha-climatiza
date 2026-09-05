@@ -4,36 +4,48 @@ Aplicativo web completo para administração de clientes, funcionários e servi�
 externos, com painel administrativo (desktop) e app mobile para os funcionários
 em campo.
 
+**100% HTML, CSS e JavaScript puros** — sem React, sem TypeScript, sem build
+step e sem backend. Todo o sistema roda inteiramente no navegador; os dados
+ficam salvos no `localStorage` do próprio navegador.
+
 ## Estrutura do projeto
 
 ```
-backend/     API REST em Node.js + Express + TypeScript + Prisma + SQLite
-frontend/    Aplicação React + Vite + TypeScript + Tailwind CSS
+frontend/
+  index.html        Ponto de entrada
+  css/styles.css     Todo o visual do sistema (variáveis de cor, componentes)
+  assets/            Ícone do site
+  js/
+    main.js          Bootstrap: registra rotas e inicia o roteador
+    router.js        Roteador baseado em hash (#/admin/agenda, #/app, ...)
+    layouts.js        Estrutura do painel admin e do app do funcionário
+    lib/
+      store.js         "Banco de dados" local (localStorage) + toda a lógica
+                        de negócio: autenticação, agendamento, distribuição
+                        por cidade, dashboard, relatórios etc.
+      ui.js            Toasts, modais, gráficos (SVG/CSS), exportação de
+                        relatórios (CSV/Excel/PDF)
+      icons.js         Ícones em SVG inline
+      date.js          Formatação de datas em pt-BR
+      theme.js         Modo claro/escuro
+    components/        Pequenos widgets reutilizáveis (tags de cidade)
+    pages/admin/       Uma tela por arquivo (dashboard, agenda, clientes...)
+    pages/employee/    Telas do app do funcionário
 ```
 
 ## Como rodar o projeto
 
-### 1. Backend (API)
-
-```bash
-cd backend
-npm install
-npx prisma migrate dev   # cria o banco de dados (primeira vez)
-npm run seed              # popula com dados de exemplo
-npm run dev                # inicia a API em http://localhost:3333
-```
-
-### 2. Frontend (aplicativo web)
-
-Em outro terminal:
+Como o app usa módulos ES (`<script type="module">`) e caminhos absolutos,
+é preciso servir a pasta `frontend/` por HTTP (não funciona abrindo o
+`index.html` direto com duplo-clique). Qualquer servidor estático simples
+resolve:
 
 ```bash
 cd frontend
-npm install
-npm run dev   # inicia em http://localhost:5173
+npx serve -l 5510
 ```
 
-Abra `http://localhost:5173` no navegador.
+Abra `http://localhost:5510` no navegador.
 
 ## Acessos de demonstração
 
@@ -44,23 +56,31 @@ Abra `http://localhost:5173` no navegador.
 | Funcionário   | marcos@nsclimatizacao.com.br         | 123456   |
 | Funcionário   | renata@nsclimatizacao.com.br         | 123456   |
 
-## Apagando os dados de exemplo e usando dados reais
+## Onde ficam os dados
 
-Os dados de demonstração (clientes, funcionários e serviços fictícios) existem
-apenas para você visualizar o sistema funcionando. Para começar a usar com os
-dados reais da empresa:
+Tudo é gravado em `localStorage`, na chave `ns_db_v1` (dados) e
+`ns_session_v1` (sessão de login). Isso significa que:
 
-1. Entre como Administrador.
-2. Vá em **Funcionários** e **Clientes** e exclua os registros de exemplo (ou
-   simplesmente cadastre os reais e vá excluindo os de exemplo aos poucos).
-3. Também é possível apagar tudo e recomeçar do zero rodando novamente:
-   ```bash
-   cd backend
-   npx prisma migrate reset
-   ```
-   Isso recria o banco vazio. Depois crie o primeiro usuário administrador
-   editando `backend/prisma/seed.ts` (ou peça para o desenvolvedor criar um
-   script de "primeiro acesso").
+- Os dados são **por navegador/dispositivo** — não há um servidor central
+  compartilhando informação entre computadores diferentes.
+- Fotos de serviços e de perfil são convertidas para imagem comprimida e
+  guardadas junto com o resto dos dados (o navegador costuma permitir alguns
+  megabytes por site).
+- Limpar os dados do site no navegador (ou o histórico/"dados de
+  navegação") apaga o sistema por completo.
+
+## Apagando os dados de exemplo e recomeçando do zero
+
+Abra o Console do navegador (F12) na página do sistema e rode:
+
+```js
+localStorage.clear();
+location.reload();
+```
+
+Isso recria a base com os dados de demonstração descritos acima. Para editar
+os dados iniciais (ex.: criar o primeiro usuário administrador real antes de
+distribuir o sistema), altere a função `seed()` em `frontend/js/lib/store.js`.
 
 ## O que já está implementado
 
@@ -79,10 +99,8 @@ dados reais da empresa:
   pendências.
 - Notificações para administrador e funcionários nos eventos importantes.
 - Relatórios com filtros por período, funcionário, cliente e status, com
-  exportação em CSV, Excel e PDF.
+  exportação em CSV, Excel (.xls) e PDF (via impressão do navegador).
 - Modo claro/escuro, layout responsivo (desktop, tablet e celular).
-- Banco de dados real (SQLite via Prisma) com upload de fotos armazenado em
-  disco — nada é simulado apenas na tela.
 - **Distribuição de serviços por cidade/região:**
   - Cada funcionário tem uma "Região de atendimento" (uma ou várias cidades),
     cadastrada em Funcionários.
@@ -101,6 +119,7 @@ dados reais da empresa:
 
 ## Personalizando a identidade visual
 
-As cores da marca ficam centralizadas em
-`frontend/src/index.css` (bloco `:root`, variáveis `--brand-*`). Basta trocar
-os valores para aplicar a nova identidade visual em todo o sistema.
+As cores da marca ficam centralizadas em `frontend/css/styles.css`, no bloco
+`:root` (variáveis `--brand-*`, `--surface-*`, `--text-*`). Basta trocar os
+valores para aplicar a nova identidade visual em todo o sistema — inclusive
+no modo escuro (bloco `.dark`).

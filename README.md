@@ -4,9 +4,11 @@ Aplicativo web completo para administração de clientes, funcionários e servi�
 externos, com painel administrativo (desktop) e app mobile para os funcionários
 em campo.
 
-**100% HTML, CSS e JavaScript puros** — sem React, sem TypeScript, sem build
-step e sem backend. Todo o sistema roda inteiramente no navegador; os dados
-ficam salvos no `localStorage` do próprio navegador.
+**Frontend 100% HTML, CSS e JavaScript puros** — sem React, sem TypeScript e
+sem build step. O painel administrativo e o app do funcionário rodam
+inteiramente no navegador e conversam direto com um banco de dados real no
+**Supabase** (Postgres + Auth + Storage), então todo mundo (administrador e
+funcionários, de qualquer dispositivo) compartilha os mesmos dados.
 
 ## Estrutura do projeto
 
@@ -14,15 +16,17 @@ ficam salvos no `localStorage` do próprio navegador.
 frontend/
   index.html        Ponto de entrada
   css/styles.css     Todo o visual do sistema (variáveis de cor, componentes)
-  assets/            Ícone do site
+  assets/            Ícone e logo do site
   js/
-    main.js          Bootstrap: registra rotas e inicia o roteador
+    main.js          Bootstrap: aguarda a sessão do Supabase, registra rotas
+                      e inicia o roteador
     router.js        Roteador baseado em hash (#/admin/agenda, #/app, ...)
     layouts.js        Estrutura do painel admin e do app do funcionário
     lib/
-      store.js         "Banco de dados" local (localStorage) + toda a lógica
-                        de negócio: autenticação, agendamento, distribuição
-                        por cidade, dashboard, relatórios etc.
+      store.js         Camada de dados: fala com o Supabase (Postgres/Auth/
+                        Storage) e concentra toda a lógica de negócio —
+                        autenticação, agendamento, distribuição por cidade,
+                        dashboard, relatórios etc.
       ui.js            Toasts, modais, gráficos (SVG/CSS), exportação de
                         relatórios (CSV/Excel/PDF)
       icons.js         Ícones em SVG inline
@@ -32,6 +36,25 @@ frontend/
     pages/admin/       Uma tela por arquivo (dashboard, agenda, clientes...)
     pages/employee/    Telas do app do funcionário
 ```
+
+## Banco de dados (Supabase)
+
+O projeto Supabase (Postgres + Auth + Storage + uma Edge Function) já vem
+configurado — a URL e a chave pública ficam embutidas em
+`frontend/js/lib/store.js` (é seguro expor essa chave: o acesso real é
+controlado por Row Level Security no banco). Principais peças:
+
+- **Tabelas**: `profiles` (admin/funcionários), `employee_cities`, `clients`,
+  `services` (+ `service_photos`, `service_materials`, `service_history`),
+  `service_requests`, `notifications` — todas com RLS: cada funcionário só
+  enxerga/edita os próprios serviços; cadastro de clientes, funcionários e
+  solicitações é restrito ao administrador.
+- **Autenticação**: Supabase Auth de verdade (sessão/JWT). Criar, trocar
+  e-mail/senha ou excluir um funcionário passa pela Edge Function
+  `admin-users`, que usa a service role no servidor (nunca exposta no
+  navegador) e só aceita chamadas de um administrador autenticado.
+- **Fotos**: enviadas para os buckets `service-photos` e `employee-photos`
+  do Supabase Storage (redimensionadas no navegador antes do envio).
 
 ## Como rodar o projeto
 
@@ -58,29 +81,24 @@ Abra `http://localhost:5510` no navegador.
 
 ## Onde ficam os dados
 
-Tudo é gravado em `localStorage`, na chave `ns_db_v1` (dados) e
-`ns_session_v1` (sessão de login). Isso significa que:
+Tudo fica no banco Postgres do projeto Supabase — os mesmos dados aparecem
+para qualquer pessoa que acessar o sistema, em qualquer computador ou
+celular. A sessão de login (token do Supabase Auth) é o único dado guardado
+no navegador de cada pessoa, só para não pedir login a cada acesso.
 
-- Os dados são **por navegador/dispositivo** — não há um servidor central
-  compartilhando informação entre computadores diferentes.
-- Fotos de serviços e de perfil são convertidas para imagem comprimida e
-  guardadas junto com o resto dos dados (o navegador costuma permitir alguns
-  megabytes por site).
-- Limpar os dados do site no navegador (ou o histórico/"dados de
-  navegação") apaga o sistema por completo.
+## Apagando os dados de exemplo e cadastrando os reais
 
-## Apagando os dados de exemplo e recomeçando do zero
+Não há um botão de "resetar" pelo navegador (o banco agora é compartilhado
+por todo mundo, então isso teria que ser uma ação deliberada do
+administrador). Para limpar os dados de demonstração:
 
-Abra o Console do navegador (F12) na página do sistema e rode:
-
-```js
-localStorage.clear();
-location.reload();
-```
-
-Isso recria a base com os dados de demonstração descritos acima. Para editar
-os dados iniciais (ex.: criar o primeiro usuário administrador real antes de
-distribuir o sistema), altere a função `seed()` em `frontend/js/lib/store.js`.
+1. Entre como Administrador.
+2. Vá em **Funcionários** e **Clientes** e exclua os registros de exemplo
+   (ou cadastre os reais e vá excluindo os de exemplo aos poucos).
+3. Para apagar tudo de uma vez e começar do zero, use o painel do Supabase
+   (SQL Editor) para limpar as tabelas `services`, `service_requests`,
+   `clients`, `notifications` etc., e o painel de Authentication para
+   remover os usuários de demonstração.
 
 ## O que já está implementado
 

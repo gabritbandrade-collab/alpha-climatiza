@@ -964,6 +964,7 @@ img {
 .topbar-menu-btn { border-radius: 0.5rem; padding: 0.5rem; color: var(--text-secondary); }
 .topbar-menu-btn:hover { background: var(--surface-muted); }
 @media (min-width: 1024px) { .topbar-menu-btn { display: none; } }
+.topbar-actions { margin-left: auto; }
 
 .user-menu-trigger {
   display: flex;
@@ -1088,6 +1089,7 @@ img {
   font-weight: 700;
   color: #fff;
 }
+.notif-badge[hidden] { display: none; }
 .notif-dropdown {
   position: absolute;
   right: 0;

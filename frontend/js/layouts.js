@@ -172,8 +172,7 @@ export function renderAdminShell(pathnameOverride) {
       <div class="admin-main">
         <header class="admin-topbar">
           <button type="button" class="topbar-menu-btn" data-drawer-open>${icon("menu", { class: "h-5 w-5" })}</button>
-          <div class="hidden lg:block"></div>
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 topbar-actions">
             ${notifBellHtml()}
             <div class="relative" data-user-menu-root>
               <button type="button" class="user-menu-trigger" data-user-menu-toggle>

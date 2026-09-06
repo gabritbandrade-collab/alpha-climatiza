@@ -1,5 +1,5 @@
 import { Services, Employees, Auth, getEmployeeSuggestions, STATUS_LABELS_PT } from "../../lib/store.js";
-import { backLink, pageHeader, fullPageSpinner, esc, errorMessage, showToast, PRIORITY_LABELS_PT } from "../../lib/ui.js";
+import { backLink, pageHeader, fullPageSpinner, esc, errorMessage, showToast, confirmDialog, PRIORITY_LABELS_PT } from "../../lib/ui.js";
 import { toDateInputValue, toTimeInputValue, combineDateTime } from "../../lib/date.js";
 import { go } from "../../router.js";
 
@@ -160,6 +160,7 @@ export async function renderServiceFormPage(container, params) {
           <div id="form-error"></div>
 
           <div class="flex justify-end gap-2 pt-2">
+            ${isEdit ? `<button type="button" class="btn btn-danger btn-md" id="delete-btn" style="margin-right:auto">Excluir serviço</button>` : ""}
             <button type="button" class="btn btn-outline btn-md" id="cancel-btn">Cancelar</button>
             <button type="submit" class="btn btn-primary btn-md" id="submit-btn">${isEdit ? "Salvar alterações" : "Criar serviço"}</button>
           </div>
@@ -197,6 +198,20 @@ export async function renderServiceFormPage(container, params) {
   checkConflict();
 
   container.querySelector("#cancel-btn").addEventListener("click", () => history.back());
+
+  container.querySelector("#delete-btn")?.addEventListener("click", () => {
+    confirmDialog({
+      title: "Excluir serviço",
+      message: "Esta ação é permanente e removerá todos os dados, fotos e histórico deste serviço. Deseja continuar?",
+      confirmLabel: "Excluir",
+      danger: true,
+      onConfirm: async () => {
+        await Services.delete(params.id);
+        showToast("Serviço excluído.");
+        go("/admin/agenda");
+      },
+    });
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();

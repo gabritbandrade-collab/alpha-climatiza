@@ -87,7 +87,20 @@ async function callAdminUsers(payload) {
     body: JSON.stringify(payload),
   });
   const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new StoreError(json.error || "Não foi possível completar a operação.");
+  if (!res.ok) {
+    if (res.status === 403 && currentProfile?.role === "ADMIN") {
+      // A conta local está marcada como admin, mas o servidor recusou o
+      // pedido — isso acontece quando a sessão (token de renovação) foi
+      // revogada no servidor mesmo com o token de acesso ainda não expirado
+      // (ex.: login feito em outro lugar). Em vez de travar num erro
+      // confuso, força um novo login.
+      await Auth.logout();
+      window.location.hash = "#/login";
+      window.location.reload();
+      throw new StoreError("Sua sessão expirou. Faça login novamente.");
+    }
+    throw new StoreError(json.error || "Não foi possível completar a operação.");
+  }
   return json;
 }
 

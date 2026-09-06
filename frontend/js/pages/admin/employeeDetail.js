@@ -7,7 +7,7 @@ import { go } from "../../router.js";
 export async function renderEmployeeDetailPage(container, params) {
   let employee;
   try {
-    employee = Employees.get(params.id);
+    employee = await Employees.get(params.id);
   } catch (err) {
     showToast(errorMessage(err), "error");
     go("/admin/funcionarios");
@@ -78,7 +78,7 @@ export async function renderEmployeeDetailPage(container, params) {
     listEl.querySelectorAll("[data-svc]").forEach((b) => b.addEventListener("click", () => go(`/admin/servicos/${b.dataset.svc}`)));
   }
 
-  container.querySelector("#employee-form").addEventListener("submit", (e) => {
+  container.querySelector("#employee-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const errEl = container.querySelector("#form-error");
     errEl.innerHTML = "";
@@ -89,7 +89,7 @@ export async function renderEmployeeDetailPage(container, params) {
     }
     if (!data.password) delete data.password;
     try {
-      Employees.update(params.id, { ...data, cities: cityWidget.getValue() });
+      await Employees.update(params.id, { ...data, cities: cityWidget.getValue() });
       showToast("Dados do funcionário atualizados.");
     } catch (err) {
       errEl.innerHTML = `<p class="alert-error">${esc(errorMessage(err))}</p>`;

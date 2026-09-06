@@ -15,13 +15,13 @@ const SERVICE_TYPES = [
 
 export async function renderServiceFormPage(container, params) {
   const isEdit = Boolean(params.id);
-  const employees = Employees.list().filter((e) => e.status === "ACTIVE");
+  const employees = (await Employees.list()).filter((e) => e.status === "ACTIVE");
 
   let service = null;
   if (isEdit) {
     container.innerHTML = fullPageSpinner();
     try {
-      service = Services.get(params.id);
+      service = await Services.get(params.id);
     } catch (err) {
       showToast(errorMessage(err), "error");
       go("/admin/agenda");
@@ -178,7 +178,7 @@ export async function renderServiceFormPage(container, params) {
   });
   stateInput.addEventListener("input", () => (stateInput.value = stateInput.value.toUpperCase()));
 
-  function checkConflict() {
+  async function checkConflict() {
     const warnEl = container.querySelector("#conflict-warning");
     warnEl.innerHTML = "";
     const employeeId = employeeSelect.value;
@@ -187,7 +187,7 @@ export async function renderServiceFormPage(container, params) {
     const time = form.elements.time.value;
     if (!employeeId || !city || !date || !time) return;
     const targetAt = new Date(`${date}T${time}:00`);
-    const suggestions = getEmployeeSuggestions({ city, targetAt, excludeServiceId: params.id });
+    const suggestions = await getEmployeeSuggestions({ city, targetAt, excludeServiceId: params.id });
     const match = suggestions.find((s) => s.id === employeeId);
     if (match?.conflict?.hasConflict) {
       warnEl.innerHTML = `<p class="alert-warning">⚠️ Este funcionário já possui "${esc(match.conflict.conflictingService.serviceType)}" agendado próximo deste horário.</p>`;
@@ -233,11 +233,11 @@ export async function renderServiceFormPage(container, params) {
     try {
       const user = Auth.currentUser();
       if (isEdit) {
-        Services.update(params.id, payload, user.id);
+        await Services.update(params.id, payload, user.id);
         showToast("Serviço atualizado com sucesso.");
         go(`/admin/servicos/${params.id}`);
       } else {
-        const created = Services.create(payload, user.id);
+        const created = await Services.create(payload, user.id);
         showToast("Serviço criado e atribuído ao funcionário.");
         go(`/admin/servicos/${created.id}`);
       }

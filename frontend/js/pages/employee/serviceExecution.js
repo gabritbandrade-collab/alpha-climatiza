@@ -1,5 +1,5 @@
 import { icon } from "../../lib/icons.js";
-import { Services, Auth, fileToDataUrl } from "../../lib/store.js";
+import { Services, Auth } from "../../lib/store.js";
 import { esc, errorMessage, showToast, openModal, statusBadge } from "../../lib/ui.js";
 import { go } from "../../router.js";
 
@@ -34,10 +34,10 @@ function photoGridHtml(photos, editable, type) {
 }
 
 export async function renderEmployeeServiceExecutionPage(container, params) {
-  function load() {
+  async function load() {
     let service;
     try {
-      service = Services.get(params.id);
+      service = await Services.get(params.id);
     } catch (err) {
       showToast(errorMessage(err), "error");
       go("/app/servicos");
@@ -123,21 +123,21 @@ export async function renderEmployeeServiceExecutionPage(container, params) {
     container.querySelector("#back-btn").addEventListener("click", () => history.back());
 
     if (editable) {
-      container.querySelector("#obs-input").addEventListener("blur", (e) => {
-        Services.setObservations(service.id, e.target.value);
+      container.querySelector("#obs-input").addEventListener("blur", async (e) => {
+        await Services.setObservations(service.id, e.target.value);
         showToast("Salvo com sucesso.");
       });
       container.querySelector("#problems-input").addEventListener("blur", (e) => Services.setProblems(service.id, e.target.value));
       container.querySelector("#pending-input").addEventListener("blur", (e) => Services.setPending(service.id, e.target.value));
 
-      container.querySelector("#material-form").addEventListener("submit", (e) => {
+      container.querySelector("#material-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         const name = fd.get("name");
         const quantity = fd.get("quantity");
         if (!name || !quantity) return;
         try {
-          Services.addMaterial(service.id, { name, quantity, notes: fd.get("notes") });
+          await Services.addMaterial(service.id, { name, quantity, notes: fd.get("notes") });
           load();
         } catch (err) {
           showToast(errorMessage(err), "error");
@@ -145,8 +145,8 @@ export async function renderEmployeeServiceExecutionPage(container, params) {
       });
 
       container.querySelectorAll("[data-del-material]").forEach((btn) =>
-        btn.addEventListener("click", () => {
-          Services.deleteMaterial(service.id, btn.dataset.delMaterial);
+        btn.addEventListener("click", async () => {
+          await Services.deleteMaterial(service.id, btn.dataset.delMaterial);
           load();
         })
       );
@@ -164,8 +164,7 @@ export async function renderEmployeeServiceExecutionPage(container, params) {
           addBtn.disabled = true;
           addBtn.innerHTML = `${icon("loader", { class: "h-5 w-5" })}<span style="font-size:11px">Enviando...</span>`;
           try {
-            const dataUrl = await fileToDataUrl(file);
-            Services.addPhoto(service.id, { type: input.dataset.photoInput, dataUrl });
+            await Services.addPhoto(service.id, { type: input.dataset.photoInput, file });
             showToast("Foto adicionada.");
             load();
           } catch (err) {
@@ -176,8 +175,8 @@ export async function renderEmployeeServiceExecutionPage(container, params) {
         });
       });
       container.querySelectorAll("[data-del-photo]").forEach((btn) =>
-        btn.addEventListener("click", () => {
-          Services.deletePhoto(service.id, btn.dataset.delPhoto);
+        btn.addEventListener("click", async () => {
+          await Services.deletePhoto(service.id, btn.dataset.delPhoto);
           load();
         })
       );
@@ -191,12 +190,12 @@ export async function renderEmployeeServiceExecutionPage(container, params) {
     const obs = container.querySelector("#obs-input")?.value;
     const problems = container.querySelector("#problems-input")?.value;
     const pending = container.querySelector("#pending-input")?.value;
-    if (obs !== undefined) Services.setObservations(service.id, obs);
-    if (problems !== undefined) Services.setProblems(service.id, problems);
-    if (pending !== undefined) Services.setPending(service.id, pending);
+    if (obs !== undefined) await Services.setObservations(service.id, obs);
+    if (problems !== undefined) await Services.setProblems(service.id, problems);
+    if (pending !== undefined) await Services.setPending(service.id, pending);
 
     try {
-      Services.complete(service.id, { force }, Auth.currentUser().id);
+      await Services.complete(service.id, { force }, Auth.currentUser().id);
       showToast("Serviço concluído com sucesso!");
       go(`/app/servicos/${service.id}`);
     } catch (err) {

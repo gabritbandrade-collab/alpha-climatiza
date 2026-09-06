@@ -9,8 +9,8 @@ export async function renderEmployeeServicesPage(container) {
   let status = "";
   let search = "";
 
-  function draw() {
-    const all = Services.list({ employeeId: user.id });
+  async function draw() {
+    const all = await Services.list({ employeeId: user.id });
     const filtered = all.filter((s) => {
       if (status && s.status !== status) return false;
       if (search) {

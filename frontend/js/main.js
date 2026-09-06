@@ -1,6 +1,7 @@
 import { registerRoutes, startRouter } from "./router.js";
 import { renderAdminShell, renderEmployeeShell, renderBareLayout } from "./layouts.js";
 import { initTheme } from "./lib/theme.js";
+import { waitForAuthReady } from "./lib/store.js";
 import { renderLoginPage } from "./pages/login.js";
 
 import { renderDashboardPage } from "./pages/admin/dashboard.js";
@@ -25,6 +26,8 @@ import { renderEmployeeNotificationsPage } from "./pages/employee/notifications.
 import { renderEmployeeProfilePage } from "./pages/employee/profile.js";
 
 initTheme();
+
+document.getElementById("app").innerHTML = `<div class="full-page-spinner" style="height:100vh"><span class="spinner spinner-lg"></span></div>`;
 
 function admin(renderFn) {
   return async (params, query) => {
@@ -73,4 +76,5 @@ registerRoutes([
   { path: "/app/perfil", role: "EMPLOYEE", handler: employee(renderEmployeeProfilePage) },
 ]);
 
+await waitForAuthReady();
 startRouter();

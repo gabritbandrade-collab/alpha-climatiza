@@ -9,8 +9,8 @@ const emptyForm = { name: "", email: "", phone: "", cargo: "", password: "", sta
 export async function renderEmployeesPage(container) {
   let search = "";
 
-  function draw() {
-    const employees = Employees.list({ search: search || undefined });
+  async function draw() {
+    const employees = await Employees.list({ search: search || undefined });
     container.innerHTML = `
       ${pageHeader({ title: "Funcionários", description: "Gerencie a equipe técnica responsável pelos serviços externos.", actionsHtml: `<button class="btn btn-primary btn-md" id="new-btn">${icon("plus", { class: "h-4 w-4" })} Novo Funcionário</button>` })}
       <div class="input-icon-wrap mb-4" style="max-width:24rem">
@@ -74,7 +74,7 @@ export async function renderEmployeesPage(container) {
           confirmLabel: "Excluir",
           danger: true,
           onConfirm: async () => {
-            Employees.delete(btn.dataset.del);
+            await Employees.delete(btn.dataset.del);
             showToast("Funcionário excluído.");
             draw();
           },
@@ -114,7 +114,7 @@ export async function renderEmployeesPage(container) {
       onMount: (api) => {
         const cityWidget = mountCityTagInput(api.el);
         api.el.querySelector('[data-act="cancel"]').addEventListener("click", api.close);
-        api.el.querySelector("#employee-form").addEventListener("submit", (e) => {
+        api.el.querySelector("#employee-form").addEventListener("submit", async (e) => {
           e.preventDefault();
           const data = Object.fromEntries(new FormData(e.target).entries());
           const errEl = api.el.querySelector("#employee-form-error");
@@ -123,13 +123,16 @@ export async function renderEmployeesPage(container) {
             errEl.innerHTML = `<p class="alert-error">Nome, e-mail e senha são obrigatórios.</p>`;
             return;
           }
+          const submitBtn = api.el.querySelector('[type="submit"][form="employee-form"]');
+          if (submitBtn) submitBtn.disabled = true;
           try {
-            Employees.create({ ...data, cities: cityWidget.getValue() });
+            await Employees.create({ ...data, cities: cityWidget.getValue() });
             showToast("Funcionário cadastrado com sucesso.");
             api.close();
             draw();
           } catch (err) {
             errEl.innerHTML = `<p class="alert-error">${esc(errorMessage(err))}</p>`;
+            if (submitBtn) submitBtn.disabled = false;
           }
         });
       },

@@ -6,7 +6,7 @@ import { go } from "../../router.js";
 export async function renderClientDetailPage(container, params) {
   let client;
   try {
-    client = Clients.get(params.id);
+    client = await Clients.get(params.id);
   } catch (err) {
     showToast(errorMessage(err), "error");
     go("/admin/clientes");
@@ -71,7 +71,7 @@ export async function renderClientDetailPage(container, params) {
     listEl.querySelectorAll("[data-svc]").forEach((b) => b.addEventListener("click", () => go(`/admin/servicos/${b.dataset.svc}`)));
   }
 
-  container.querySelector("#client-form").addEventListener("submit", (e) => {
+  container.querySelector("#client-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const errEl = container.querySelector("#form-error");
     errEl.innerHTML = "";
@@ -81,7 +81,7 @@ export async function renderClientDetailPage(container, params) {
       return;
     }
     try {
-      Clients.update(params.id, data);
+      await Clients.update(params.id, data);
       showToast("Dados do cliente atualizados.");
     } catch (err) {
       errEl.innerHTML = `<p class="alert-error">${esc(errorMessage(err))}</p>`;

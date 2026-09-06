@@ -48,7 +48,7 @@ export async function renderAgendaPage(container, query) {
     selectedDay: null,
   };
 
-  const employees = Employees.list();
+  const employees = await Employees.list();
 
   function servicesByDayMap(services) {
     const map = new Map();
@@ -60,8 +60,8 @@ export async function renderAgendaPage(container, query) {
     return map;
   }
 
-  function draw() {
-    const services = Services.list({
+  async function draw() {
+    const services = await Services.list({
       status: state.status || undefined,
       employeeId: state.employeeId || undefined,
       city: state.city || undefined,

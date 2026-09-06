@@ -4,8 +4,8 @@ import { pageHeader, emptyState, esc, statusBadge, verticalBarChart, exportRepor
 import { formatDateTime } from "../../lib/date.js";
 
 export async function renderReportsPage(container) {
-  const employees = Employees.list();
-  const clients = Clients.list();
+  const employees = await Employees.list();
+  const clients = await Clients.list();
   const filters = { dateFrom: "", dateTo: "", employeeId: "", clientId: "", status: "" };
   let tab = "services";
 
@@ -28,9 +28,9 @@ export async function renderReportsPage(container) {
     });
   }
 
-  function draw() {
-    const rows = currentRows();
-    const materials = currentMaterials();
+  async function draw() {
+    const rows = await currentRows();
+    const materials = await currentMaterials();
 
     container.innerHTML = `
       ${pageHeader({ title: "Relatórios", description: "Analise os serviços realizados com filtros detalhados." })}

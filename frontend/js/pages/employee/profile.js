@@ -1,5 +1,5 @@
 import { icon } from "../../lib/icons.js";
-import { Auth, fileToDataUrl } from "../../lib/store.js";
+import { Auth, uploadEmployeePhoto } from "../../lib/store.js";
 import { esc, errorMessage, showToast, openModal, avatarInitial } from "../../lib/ui.js";
 import { getTheme, toggleTheme } from "../../lib/theme.js";
 import { go, refresh } from "../../router.js";
@@ -63,8 +63,8 @@ export async function renderEmployeeProfilePage(container) {
     toggleTheme();
     refresh();
   });
-  container.querySelector("#logout-btn").addEventListener("click", () => {
-    Auth.logout();
+  container.querySelector("#logout-btn").addEventListener("click", async () => {
+    await Auth.logout();
     go("/login");
   });
 
@@ -73,8 +73,8 @@ export async function renderEmployeeProfilePage(container) {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await fileToDataUrl(file, 400, 0.8);
-      Auth.updateMe(user.id, { photoUrl: dataUrl });
+      const photoUrl = await uploadEmployeePhoto(file);
+      await Auth.updateMe(user.id, { photoUrl });
       showToast("Foto atualizada.");
       refresh();
     } catch (err) {
@@ -82,10 +82,10 @@ export async function renderEmployeeProfilePage(container) {
     }
   });
 
-  container.querySelector("#save-phone-btn").addEventListener("click", () => {
+  container.querySelector("#save-phone-btn").addEventListener("click", async () => {
     const phone = container.querySelector("#phone-input").value;
     try {
-      Auth.updateMe(user.id, { phone });
+      await Auth.updateMe(user.id, { phone });
       showToast("Telefone atualizado.");
     } catch (err) {
       showToast(errorMessage(err), "error");
@@ -108,13 +108,13 @@ export async function renderEmployeeProfilePage(container) {
         </form>
       `,
       onMount: (modal) => {
-        modal.el.querySelector("#pw-form").addEventListener("submit", (e) => {
+        modal.el.querySelector("#pw-form").addEventListener("submit", async (e) => {
           e.preventDefault();
           const fd = new FormData(e.target);
           const errEl = modal.el.querySelector("#pw-error");
           errEl.innerHTML = "";
           try {
-            Auth.changePassword(user.id, fd.get("currentPassword"), fd.get("newPassword"));
+            await Auth.changePassword(user.id, fd.get("currentPassword"), fd.get("newPassword"));
             showToast("Senha alterada com sucesso.");
             modal.close();
           } catch (err) {

@@ -16,7 +16,7 @@ function infoRow(iconName, label, value) {
 export async function renderEmployeeServiceDetailPage(container, params) {
   let service;
   try {
-    service = Services.get(params.id);
+    service = await Services.get(params.id);
   } catch (err) {
     showToast(errorMessage(err), "error");
     go("/app/servicos");
@@ -59,7 +59,7 @@ export async function renderEmployeeServiceDetailPage(container, params) {
     btn.disabled = true;
     btn.innerHTML = `${icon("loader", { class: "h-4 w-4" })} Aguarde...`;
     try {
-      Services.start(service.id, Auth.currentUser().id);
+      await Services.start(service.id, Auth.currentUser().id);
       showToast("Serviço iniciado!");
       go(`/app/servicos/${service.id}/execucao`);
     } catch (err) {

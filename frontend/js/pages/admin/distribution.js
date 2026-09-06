@@ -17,12 +17,12 @@ function statCard({ label, value, iconName, accent, onClick }) {
 }
 
 export async function renderDistributionPage(container) {
-  const stats = Distribution.stats();
+  const stats = await Distribution.stats();
   let tab = "cities";
   let selectedCity = null;
   let agendas = null;
 
-  function draw() {
+  async function draw() {
     const cityDetail = stats.byCity.find((c) => c.city === selectedCity);
 
     container.innerHTML = `
@@ -109,7 +109,7 @@ export async function renderDistributionPage(container) {
       body.querySelectorAll("[data-emp]").forEach((btn) => btn.addEventListener("click", () => go(`/admin/funcionarios/${btn.dataset.emp}`)));
       body.querySelector("#see-city-agenda")?.addEventListener("click", () => go(`/admin/agenda?city=${encodeURIComponent(cityDetail.city)}`));
     } else {
-      if (!agendas) agendas = Distribution.byEmployee();
+      if (!agendas) agendas = await Distribution.byEmployee();
       body.innerHTML = `<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         ${agendas
           .map(

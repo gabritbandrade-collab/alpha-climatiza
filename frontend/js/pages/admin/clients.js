@@ -8,8 +8,8 @@ const emptyForm = { name: "", document: "", phone: "", email: "", address: "", n
 export async function renderClientsPage(container) {
   let search = "";
 
-  function draw() {
-    const clients = Clients.list({ search: search || undefined });
+  async function draw() {
+    const clients = await Clients.list({ search: search || undefined });
     container.innerHTML = `
       ${pageHeader({ title: "Clientes", description: "Gerencie os clientes atendidos pela empresa.", actionsHtml: `<button class="btn btn-primary btn-md" id="new-btn">${icon("plus", { class: "h-4 w-4" })} Novo Cliente</button>` })}
       <div class="input-icon-wrap mb-4" style="max-width:24rem">
@@ -65,7 +65,7 @@ export async function renderClientsPage(container) {
           confirmLabel: "Excluir",
           danger: true,
           onConfirm: async () => {
-            Clients.delete(btn.dataset.del);
+            await Clients.delete(btn.dataset.del);
             showToast("Cliente excluído.");
             draw();
           },
@@ -83,7 +83,7 @@ export async function renderClientsPage(container) {
       footerHtml: `<button type="button" class="btn btn-outline btn-md" data-act="cancel">Cancelar</button><button type="submit" form="client-form" class="btn btn-primary btn-md">Salvar cliente</button>`,
       onMount: (api) => {
         api.el.querySelector('[data-act="cancel"]').addEventListener("click", api.close);
-        api.el.querySelector("#client-form").addEventListener("submit", (e) => {
+        api.el.querySelector("#client-form").addEventListener("submit", async (e) => {
           e.preventDefault();
           const fd = new FormData(e.target);
           const data = Object.fromEntries(fd.entries());
@@ -94,7 +94,7 @@ export async function renderClientsPage(container) {
             return;
           }
           try {
-            Clients.create(data);
+            await Clients.create(data);
             showToast("Cliente cadastrado com sucesso.");
             api.close();
             draw();

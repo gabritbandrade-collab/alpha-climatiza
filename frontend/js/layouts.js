@@ -14,8 +14,8 @@ function freshSignal() {
   return shellAbort.signal;
 }
 
-function handleLogout() {
-  Auth.logout();
+async function handleLogout() {
+  await Auth.logout();
   go("/login");
 }
 
@@ -60,8 +60,8 @@ function wireNotifBell(root, basePath, signal) {
   const badge = root.querySelector("[data-notif-badge]");
   const markAllBtn = root.querySelector("[data-notif-mark-all]");
 
-  function refresh() {
-    const notifications = Notifications.list(user.id);
+  async function refreshList() {
+    const notifications = await Notifications.list(user.id);
     const unread = notifications.filter((n) => !n.read).length;
     badge.hidden = unread === 0;
     badge.textContent = unread > 9 ? "9+" : String(unread);
@@ -70,27 +70,27 @@ function wireNotifBell(root, basePath, signal) {
       ? notifications.map(notifItemHtml).join("")
       : `<p class="text-sm text-muted text-center" style="padding:2rem 1rem">Nenhuma notificação por aqui.</p>`;
     list.querySelectorAll("[data-notif-id]").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         const id = btn.dataset.notifId;
-        Notifications.markRead(user.id, id);
+        await Notifications.markRead(user.id, id);
         dropdown.hidden = true;
         const related = btn.dataset.related;
         if (related) go(`${basePath}/servicos/${related}`);
-        refresh();
+        refreshList();
       });
     });
   }
-  refresh();
+  refreshList();
 
   toggleBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     dropdown.hidden = !dropdown.hidden;
-    if (!dropdown.hidden) refresh();
+    if (!dropdown.hidden) refreshList();
   });
-  markAllBtn.addEventListener("click", (e) => {
+  markAllBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
-    Notifications.markAllRead(user.id);
-    refresh();
+    await Notifications.markAllRead(user.id);
+    refreshList();
   });
   document.addEventListener(
     "click",

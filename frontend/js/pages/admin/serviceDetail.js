@@ -15,10 +15,10 @@ const ACTION_LABELS = {
 };
 
 export async function renderAdminServiceDetailPage(container, params) {
-  function load() {
+  async function load() {
     let service;
     try {
-      service = Services.get(params.id);
+      service = await Services.get(params.id);
     } catch (err) {
       showToast(errorMessage(err), "error");
       go("/admin/agenda");
@@ -153,7 +153,7 @@ export async function renderAdminServiceDetailPage(container, params) {
         confirmLabel: "Excluir",
         danger: true,
         onConfirm: async () => {
-          Services.delete(service.id);
+          await Services.delete(service.id);
           showToast("Serviço excluído.");
           go("/admin/agenda");
         },
@@ -190,16 +190,16 @@ function openTransferModal(service, onDone) {
         <button type="button" class="btn btn-primary btn-md" data-act="confirm" disabled>Confirmar transferência</button>
       </div>
     `,
-    onMount: (api) => {
+    onMount: async (api) => {
       const listEl = api.el.querySelector("#transfer-list");
       const conflictEl = api.el.querySelector("#transfer-conflict");
       const confirmBtn = api.el.querySelector('[data-act="confirm"]');
       api.el.querySelector('[data-act="cancel"]').addEventListener("click", api.close);
 
       if (service.city) {
-        options = getEmployeeSuggestions({ city: service.city, targetAt: new Date(service.scheduledAt), excludeServiceId: service.id }).filter((o) => o.id !== service.employeeId);
+        options = (await getEmployeeSuggestions({ city: service.city, targetAt: new Date(service.scheduledAt), excludeServiceId: service.id })).filter((o) => o.id !== service.employeeId);
       } else {
-        options = Employees.list()
+        options = (await Employees.list())
           .filter((e) => e.status === "ACTIVE" && e.id !== service.employeeId)
           .map((e) => ({ id: e.id, name: e.name, cargo: e.cargo, conflict: { hasConflict: false } }));
       }
@@ -233,7 +233,7 @@ function openTransferModal(service, onDone) {
         confirmBtn.disabled = true;
         confirmBtn.innerHTML = `${icon("loader", { class: "h-4 w-4" })} Aguarde...`;
         try {
-          Services.transfer(service.id, { employeeId: selected, force }, Auth.currentUser().id);
+          await Services.transfer(service.id, { employeeId: selected, force }, Auth.currentUser().id);
           showToast("Serviço transferido com sucesso.");
           api.close();
           onDone();

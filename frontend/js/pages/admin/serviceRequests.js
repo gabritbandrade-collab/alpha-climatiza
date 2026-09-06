@@ -17,8 +17,8 @@ const SERVICE_TYPES = [
 export async function renderServiceRequestsPage(container, params, query) {
   const filters = { status: query.status || "PENDING", city: "", priority: "", search: "" };
 
-  function draw() {
-    const requests = ServiceRequests.list({
+  async function draw() {
+    const requests = await ServiceRequests.list({
       status: filters.status || undefined,
       city: filters.city || undefined,
       priority: filters.priority || undefined,
@@ -149,7 +149,7 @@ export async function renderServiceRequestsPage(container, params, query) {
         api.el.querySelector("#req-type").addEventListener("change", (e) => {
           api.el.querySelector("#req-custom-wrap").style.display = e.target.value === "Outro" ? "" : "none";
         });
-        api.el.querySelector("#request-form").addEventListener("submit", (e) => {
+        api.el.querySelector("#request-form").addEventListener("submit", async (e) => {
           e.preventDefault();
           const fd = new FormData(e.target);
           const data = Object.fromEntries(fd.entries());
@@ -160,7 +160,7 @@ export async function renderServiceRequestsPage(container, params, query) {
             return;
           }
           try {
-            const created = ServiceRequests.create({
+            const created = await ServiceRequests.create({
               clientName: data.clientName,
               phone: data.phone,
               address: data.address,

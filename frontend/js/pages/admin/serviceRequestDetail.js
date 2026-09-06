@@ -11,10 +11,10 @@ export async function renderServiceRequestDetailPage(container, params) {
   let assigning = false;
   let conflictWarning = null;
 
-  function load() {
+  async function load() {
     let request;
     try {
-      request = ServiceRequests.get(params.id);
+      request = await ServiceRequests.get(params.id);
     } catch (err) {
       showToast(errorMessage(err), "error");
       go("/admin/solicitacoes");
@@ -25,8 +25,8 @@ export async function renderServiceRequestDetailPage(container, params) {
     draw(request);
   }
 
-  function draw(request) {
-    const suggestions = request.status === "PENDING" ? ServiceRequests.suggestions(request.id) : null;
+  async function draw(request) {
+    const suggestions = request.status === "PENDING" ? await ServiceRequests.suggestions(request.id) : null;
     if (suggestions && !selectedEmployee) {
       const recommended = suggestions.find((s) => s.recommended);
       selectedEmployee = recommended ? recommended.id : suggestions[0]?.id || "";
@@ -89,7 +89,7 @@ export async function renderServiceRequestDetailPage(container, params) {
         confirmLabel: "Cancelar solicitação",
         danger: true,
         onConfirm: async () => {
-          ServiceRequests.cancel(request.id);
+          await ServiceRequests.cancel(request.id);
           showToast("Solicitação cancelada.");
           load();
         },
@@ -178,7 +178,7 @@ export async function renderServiceRequestDetailPage(container, params) {
       const conflictBox = container.querySelector("#conflict-box");
       conflictBox.innerHTML = "";
       try {
-        ServiceRequests.assign(request.id, { employeeId: selectedEmployee, scheduledAt: combineDateTime(date, time), force }, Auth.currentUser().id);
+        await ServiceRequests.assign(request.id, { employeeId: selectedEmployee, scheduledAt: combineDateTime(date, time), force }, Auth.currentUser().id);
         showToast("Serviço atribuído e enviado ao funcionário!");
         load();
       } catch (err) {

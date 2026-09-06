@@ -23,7 +23,7 @@ export async function renderDashboardPage(container) {
   container.innerHTML = `<div id="dash-root"></div>`;
   const root = container.querySelector("#dash-root");
 
-  const stats = Dashboard.stats();
+  const stats = await Dashboard.stats();
 
   const pieData = stats.byStatus.map((s) => ({ label: STATUS_LABELS[s.status] || s.status, value: s.count, color: COLORS[s.status] || "#94a3b8" }));
   const timelineData = stats.timeline.map((t) => ({ label: formatDate(t.date, "dd/MM"), value: t.count }));

@@ -6,8 +6,8 @@ import { go } from "../../router.js";
 export async function renderAdminNotificationsPage(container) {
   const user = Auth.currentUser();
 
-  function draw() {
-    const notifications = Notifications.list(user.id);
+  async function draw() {
+    const notifications = await Notifications.list(user.id);
     const unreadCount = notifications.filter((n) => !n.read).length;
 
     container.innerHTML = `
@@ -21,8 +21,8 @@ export async function renderAdminNotificationsPage(container) {
       </div>
     `;
 
-    container.querySelector("#mark-all")?.addEventListener("click", () => {
-      Notifications.markAllRead(user.id);
+    container.querySelector("#mark-all")?.addEventListener("click", async () => {
+      await Notifications.markAllRead(user.id);
       draw();
     });
 
@@ -47,8 +47,8 @@ export async function renderAdminNotificationsPage(container) {
       : emptyState({ title: "Nenhuma notificação por aqui." });
 
     list.querySelectorAll("[data-id]").forEach((btn) =>
-      btn.addEventListener("click", () => {
-        Notifications.markRead(user.id, btn.dataset.id);
+      btn.addEventListener("click", async () => {
+        await Notifications.markRead(user.id, btn.dataset.id);
         const related = btn.dataset.related;
         if (related) go(`/admin/servicos/${related}`);
         else draw();

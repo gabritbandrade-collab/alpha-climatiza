@@ -62,7 +62,7 @@ export function renderLoginPage() {
     submitBtn.disabled = true;
     submitBtn.innerHTML = `${icon("loader", { class: "h-4 w-4" })} Entrando...`;
     try {
-      const user = Auth.login(formData.get("email"), formData.get("password"));
+      const user = await Auth.login(formData.get("email"), formData.get("password"));
       go(homeFor(user));
     } catch (err) {
       errorEl.innerHTML = `<p class="alert-error">${esc(errorMessage(err, "Não foi possível entrar. Verifique suas credenciais."))}</p>`;
@@ -86,10 +86,10 @@ export function renderLoginPage() {
         </form>
       `,
       onMount: (modal) => {
-        modal.el.querySelector("#forgot-form").addEventListener("submit", (e) => {
+        modal.el.querySelector("#forgot-form").addEventListener("submit", async (e) => {
           e.preventDefault();
           const email = new FormData(e.target).get("email");
-          const message = Auth.forgotPassword(email);
+          const message = await Auth.forgotPassword(email);
           modal.el.querySelector("#forgot-form").innerHTML = `
             <p class="text-sm text-secondary">${esc(message)}</p>
             <button type="button" class="btn btn-primary btn-md btn-full" id="forgot-ok" style="margin-top:1rem">Entendi</button>

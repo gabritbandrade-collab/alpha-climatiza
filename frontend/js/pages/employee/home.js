@@ -8,7 +8,7 @@ export async function renderEmployeeHomePage(container) {
   const user = Auth.currentUser();
   const dateFrom = new Date().toISOString();
   const dateTo = addDaysIso(new Date(), 7);
-  const services = Services.list({ employeeId: user.id, dateFrom, dateTo });
+  const services = await Services.list({ employeeId: user.id, dateFrom, dateTo });
 
   const active = services.filter((s) => s.status !== "CANCELLED");
   const next = active.find((s) => s.status === "SCHEDULED" || s.status === "IN_PROGRESS") || active[0];

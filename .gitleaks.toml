@@ -1,0 +1,14 @@
+title = "gitleaks config — alpha-climatiza"
+
+[extend]
+useDefault = true
+
+# A chave "anon" do Supabase em frontend/js/lib/store.js não é um segredo:
+# o app roda inteiramente no navegador e essa chave é pública por design
+# (equivalente ao apiKey do Firebase) — o acesso real aos dados é
+# controlado por Row Level Security no banco. Ver README.md.
+[[allowlist]]
+description = "Chave publica (anon) do Supabase - protegida por RLS, uso client-side e intencional"
+paths = ['''frontend/js/lib/store\.js''']
+regexes = ['''"role":"anon"''']
+regexTarget = "match"

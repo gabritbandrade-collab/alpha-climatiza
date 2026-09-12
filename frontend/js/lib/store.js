@@ -3,6 +3,11 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = "https://lmvlrnsrzvazvjqfvxcm.supabase.co";
+// Chave pública "anon" do Supabase — não é um segredo. Ela precisa estar no
+// código porque o app roda inteiramente no navegador; o acesso real aos
+// dados é controlado por Row Level Security no banco (ver README.md). Não
+// confundir com a service_role key, essa sim privada e nunca exposta aqui.
+// nosemgrep: generic.secrets.security.detected-jwt-token.detected-jwt-token
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdmxybnNyenZhenZqcWZ2eGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MjQ5NjQsImV4cCI6MjEwNDIwMDk2NH0.-az0DBlChzi22aTONzTl5W-ZlrrCZ_WAGWilZ2psCCc";
 const EDGE_URL = `${SUPABASE_URL}/functions/v1/admin-users`;

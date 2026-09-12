@@ -16,6 +16,9 @@ function compile(path) {
       return seg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     })
     .join("/");
+  // `path` vem sempre da lista estática de rotas registrada em main.js
+  // (nunca de entrada do usuário), então não há risco de ReDoS/injeção.
+  // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
   return { regex: new RegExp(`^${source}$`), keys };
 }
 

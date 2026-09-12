@@ -5,21 +5,25 @@ let routes = [];
 let notFoundPath = "/login";
 
 function compile(path) {
-  const keys = [];
-  const source = path
-    .split("/")
-    .map((seg) => {
-      if (seg.startsWith(":")) {
-        keys.push(seg.slice(1));
-        return "([^/]+)";
-      }
-      return seg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    })
-    .join("/");
-  // `path` vem sempre da lista estática de rotas registrada em main.js
-  // (nunca de entrada do usuário), então não há risco de ReDoS/injeção.
-  // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
-  return { regex: new RegExp(`^${source}$`), keys };
+  return { segments: path.split("/") };
+}
+
+// Casa `pathname` contra os segmentos de uma rota sem usar regex: mais
+// simples de auditar e sem nenhuma superfície de ReDoS.
+function matchRoute(route, pathname) {
+  const parts = pathname.split("/");
+  if (parts.length !== route.segments.length) return null;
+  const params = {};
+  for (let i = 0; i < route.segments.length; i++) {
+    const seg = route.segments[i];
+    if (seg.startsWith(":")) {
+      if (!parts[i]) return null;
+      params[seg.slice(1)] = decodeURIComponent(parts[i]);
+    } else if (seg !== parts[i]) {
+      return null;
+    }
+  }
+  return params;
 }
 
 export function registerRoutes(routeDefs) {
@@ -65,10 +69,8 @@ async function render() {
   }
 
   for (const route of routes) {
-    const m = route.regex.exec(pathname);
-    if (!m) continue;
-    const params = {};
-    route.keys.forEach((key, i) => (params[key] = decodeURIComponent(m[i + 1])));
+    const params = matchRoute(route, pathname);
+    if (!params) continue;
 
     if (route.role && !user) {
       go("/login");

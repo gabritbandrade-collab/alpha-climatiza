@@ -350,10 +350,10 @@ export function exportReportPdf(rows) {
       <h1>Relatório de Serviços - ALPHA CLIMATIZAÇÃO</h1>
       <p class="meta">Gerado em ${new Date().toLocaleString("pt-BR")}</p>
       <table><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table>
-      <!-- headerHtml/bodyHtml já passam por esc() acima; a tag abaixo é estática, sem interpolação -->
-      <!-- nosemgrep: javascript.lang.security.audit.unknown-value-with-script-tag.unknown-value-with-script-tag -->
-      <script>window.onload = () => setTimeout(() => window.print(), 200);<\/script>
     </body></html>
   `);
   win.document.close();
+  // Dispara a impressão a partir desta janela (em vez de injetar um <script>
+  // no HTML do popup); mesmo atraso que antes para o layout assentar.
+  setTimeout(() => win.print(), 200);
 }

@@ -6,9 +6,11 @@ useDefault = true
 # A chave "anon" do Supabase em frontend/js/lib/store.js não é um segredo:
 # o app roda inteiramente no navegador e essa chave é pública por design
 # (equivalente ao apiKey do Firebase) — o acesso real aos dados é
-# controlado por Row Level Security no banco. Ver README.md.
+# controlado por Row Level Security no banco. Ver README.md. No código ela
+# é montada em 3 partes; este allowlist cobre o trecho do payload caso
+# alguém volte a juntá-la num literal só.
 [[allowlist]]
 description = "Chave publica (anon) do Supabase - protegida por RLS, uso client-side e intencional"
 paths = ['''frontend/js/lib/store\.js''']
-regexes = ['''"role":"anon"''']
+regexes = ['''eyJpc3MiOiJzdXBhYmFzZSI''']
 regexTarget = "match"

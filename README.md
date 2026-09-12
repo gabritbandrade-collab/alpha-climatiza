@@ -86,6 +86,16 @@ para qualquer pessoa que acessar o sistema, em qualquer computador ou
 celular. A sessão de login (token do Supabase Auth) é o único dado guardado
 no navegador de cada pessoa, só para não pedir login a cada acesso.
 
+## Projeto pausa sozinho sem uso (plano gratuito)
+
+O plano gratuito do Supabase pausa o projeto automaticamente depois de
+cerca de 1 semana sem nenhum acesso — quando isso acontece, o app inteiro
+para de funcionar (login, listagens, tudo) porque o endereço do banco
+para de responder. Não é um bug do app nem invasão. Para reativar, entre
+em [supabase.com/dashboard](https://supabase.com/dashboard), abra o
+projeto e clique em "Restore"/"Unpause" — volta ao ar em 1–2 minutos, com
+todos os dados intactos.
+
 ## Apagando os dados de exemplo e cadastrando os reais
 
 Não há um botão de "resetar" pelo navegador (o banco agora é compartilhado

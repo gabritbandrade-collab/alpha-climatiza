@@ -72,12 +72,9 @@ Abra `http://localhost:5510` no navegador.
 
 ## Acessos de demonstração
 
-| Perfil        | E-mail                              | Senha    |
-|---------------|--------------------------------------|----------|
-| Administrador | admin@nsclimatizacao.com.br          | admin123 |
-| Funcionário   | joao@nsclimatizacao.com.br           | 123456   |
-| Funcionário   | marcos@nsclimatizacao.com.br         | 123456   |
-| Funcionário   | renata@nsclimatizacao.com.br         | 123456   |
+Por segurança, e-mails e senhas das contas não ficam mais neste arquivo.
+Peça os acessos ao responsável pelo sistema ou crie/consulte os usuários no
+painel do Supabase (Authentication).
 
 ## Onde ficam os dados
 

@@ -6,6 +6,7 @@ import { esc } from "./lib/ui.js";
 import { formatDistanceToNow } from "./lib/date.js";
 import { getTheme, toggleTheme } from "./lib/theme.js";
 import { go, currentPathname, refresh } from "./router.js";
+import { installButtonHtml, wireInstallButtons, isInstalled } from "./lib/pwa.js";
 
 let shellAbort = null;
 function freshSignal() {
@@ -139,6 +140,7 @@ function sidebarInnerHtml(pathname, theme) {
       </div>
       <nav class="sidebar-nav">${sidebarNavHtml(pathname)}</nav>
       <div class="sidebar-footer">
+        ${installButtonHtml("sidebar-footer-btn")}
         <button type="button" class="sidebar-footer-btn" data-theme-toggle>
           ${icon(theme === "dark" ? "sun" : "moon", { class: "h-[18px] w-[18px]" })}
           ${theme === "dark" ? "Modo claro" : "Modo escuro"}
@@ -197,6 +199,7 @@ export function renderAdminShell(pathnameOverride) {
 
   const root = document.getElementById("app");
   root.querySelectorAll("[data-logout]").forEach((b) => b.addEventListener("click", handleLogout));
+  wireInstallButtons(root);
   root.querySelectorAll("[data-theme-toggle]").forEach((b) =>
     b.addEventListener("click", () => {
       toggleTheme();
@@ -207,6 +210,7 @@ export function renderAdminShell(pathnameOverride) {
   const drawer = root.querySelector("[data-mobile-drawer]");
   root.querySelector("[data-drawer-open]").addEventListener("click", () => (drawer.hidden = false));
   root.querySelectorAll("[data-drawer-close]").forEach((b) => b.addEventListener("click", () => (drawer.hidden = true)));
+  drawer.querySelectorAll("[data-pwa-install]").forEach((b) => b.addEventListener("click", () => (drawer.hidden = true)));
 
   const userMenuDropdown = root.querySelector("[data-user-menu-dropdown]");
   root.querySelector("[data-user-menu-toggle]").addEventListener("click", (e) => {
@@ -258,6 +262,7 @@ export function renderEmployeeShell(pathnameOverride) {
           </div>
         </div>
         <div class="flex items-center gap-1">
+          ${isInstalled() ? "" : `<button type="button" class="icon-btn" data-pwa-install title="Instalar aplicativo" aria-label="Instalar aplicativo">${icon("download", { class: "h-5 w-5" })}</button>`}
           <button type="button" class="icon-btn" data-theme-toggle>${icon(theme === "dark" ? "sun" : "moon", { class: "h-5 w-5" })}</button>
           ${notifBellHtml()}
         </div>
@@ -284,6 +289,7 @@ export function renderEmployeeShell(pathnameOverride) {
       refresh();
     })
   );
+  wireInstallButtons(root);
   wireNotifBell(root.querySelector("[data-notif-root]"), "/app", signal);
 
   return document.getElementById("page-content");

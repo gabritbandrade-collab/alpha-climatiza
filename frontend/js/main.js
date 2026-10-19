@@ -1,6 +1,7 @@
 import { registerRoutes, startRouter } from "./router.js";
 import { renderAdminShell, renderEmployeeShell, renderBareLayout } from "./layouts.js";
 import { initTheme } from "./lib/theme.js";
+import { initPwa } from "./lib/pwa.js";
 import { waitForAuthReady } from "./lib/store.js";
 import { renderLoginPage } from "./pages/login.js";
 
@@ -26,6 +27,7 @@ import { renderEmployeeNotificationsPage } from "./pages/employee/notifications.
 import { renderEmployeeProfilePage } from "./pages/employee/profile.js";
 
 initTheme();
+initPwa();
 
 document.getElementById("app").innerHTML = `<div class="full-page-spinner" style="height:100vh"><span class="spinner spinner-lg"></span></div>`;
 
